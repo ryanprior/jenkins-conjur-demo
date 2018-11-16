@@ -1,0 +1,6 @@
+---
+- hosts: demoMachines
+  roles:
+    - jenkins
+  vars:
+    conjur_endpoint: https://eval.conjur.org

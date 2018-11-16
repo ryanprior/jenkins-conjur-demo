@@ -1,0 +1,74 @@
+---
+- name: install repo for Docker
+  get_url:
+    url: "https://download.docker.com/linux/centos/docker-ce.repo"
+    dest: /etc/yum.repos.d/docker-ce.repo
+    owner: root
+    group: root
+  become: true
+
+- name: ensure Docker and Pip are installed
+  yum:
+    name:
+      - docker-ce
+      - python-pip
+    update_cache: yes
+    state: present
+
+- name: start Docker daemon
+  service:
+    name: docker
+    state: started
+
+- name: install prerequisite Python packages
+  pip:
+    name:
+      - python-jenkins
+      - lxml
+      - docker
+    state: present
+
+- name: Build curl image
+  docker_image:
+    name: curl_image
+    path: "{{ role_path }}/files/curlContainer/"
+    state: present
+    force: yes
+
+- name: Build jenkins image
+  docker_image:
+    name: "{{ jenkins_image_name }}"
+    path: "{{ role_path }}/files/jenkins/"
+    state: present
+    force: yes
+
+- name: Start Jenkins
+  docker_container:
+    name: "{{ jenkins_container_name }}"
+    image: "{{ jenkins_image_name }}"
+    state: started
+    user: root
+    published_ports:
+     - "{{ jenkins_port }}:8080"
+     - "50000:50000"
+    volumes:
+     - "/var/run/docker.sock:/var/run/docker.sock"
+    restart_policy: always
+    recreate: yes
+
+- name: Ensure Jenkins is responsive
+  uri:
+    url: "{{ jenkins_url }}"
+    return_content: yes
+  register: webpage
+  until: '"New Item" in webpage.content'
+  retries: 60
+  delay: 5
+
+
+- name: Set up Jenkins Labs
+  jenkins_job:
+    name: Fetch Conjur Secret
+    config: "{{ lookup('file','files/config.xml') }}"
+    url: "{{ jenkins_url }}"
+    state: present

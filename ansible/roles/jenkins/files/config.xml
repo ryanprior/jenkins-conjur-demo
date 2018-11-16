@@ -1,0 +1,35 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.29">
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty plugin="gitlab-plugin@1.5.10">
+      <gitLabConnection></gitLabConnection>
+    </com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty>
+    <org.jenkinsci.plugins.gogs.GogsProjectProperty plugin="gogs-webhook@1.0.14">
+      <gogsSecret></gogsSecret>
+      <gogsUsePayload>false</gogsUsePayload>
+    </org.jenkinsci.plugins.gogs.GogsProjectProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.60">
+    <script>node {
+      stage(&apos;Work&apos;) {
+         withCredentials([conjurSecretCredential(credentialsId: &apos;DEMO_PW&apos;,
+                                                 variable: &apos;SECRET&apos;)]) {
+            echo &quot;Secret from Conjur is: $SECRET&quot;
+            writeFile(
+                file: &quot;secret.json&quot;,
+                text: &quot;{secret: \&quot;$SECRET\&quot;}&quot;)
+         }
+      }
+      stage(&apos;Results&apos;) {
+          archiveArtifacts artifacts: &quot;*.json&quot;
+          echo &quot;Finished!&quot;
+      }
+}</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>

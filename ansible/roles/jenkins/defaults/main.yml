@@ -1,0 +1,28 @@
+---
+# defaults file for conjurConfig
+conjur_version: 'OSS'
+conjur_container_name: 'conjur-master'
+conjur_network_name: conjur
+conjur_https_port: '443'
+conjur_cli_container_name: 'conjur-cli'
+conjur_cli_image_name: 'cdemo/conjur-cli:latest'
+conjur_account: 'cyberark'
+conjur_admin_password: 'Cyberark1'
+conjur_internal_url: "https://{{ conjur_container_name }}"
+conjur_external_url: "https://{{ ansible_default_ipv4.address }}"
+conjur_audit_volume: "audit"
+conjur_audit_directory: '/var/log/conjur'
+conjur_devops_admin_account: "eva"
+
+conjur_OSS_image_name: 'cyberark/conjur'
+conjur_OSS_port: '81'
+conjur_OSS_url: "http://{{ ansible_default_ipv4.address }}:{{ conjur_OSS_port }}"
+conjur_OSS_container_name: 'conjur-oss'
+conjur_nginx_image_name: 'cdemo/conjur-nginx:latest'
+
+# defaults file for jenkinsConfig
+jenkins_install: 'NO'
+jenkins_port: '8080'
+jenkins_url: "http://{{ ansible_default_ipv4.address }}:{{ jenkins_port }}"
+jenkins_image_name: 'conjur_jenkins:latest'
+jenkins_container_name: 'jenkins'
